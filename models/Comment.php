@@ -2,7 +2,6 @@
 
 namespace app\models;
 
-use Yii;
 
 /**
  * This is the model class for table "{{%comment}}".
@@ -21,24 +20,15 @@ use Yii;
 class Comment extends \yii\db\ActiveRecord
 {
     const STATUSES = [
-        1 => 'New',
-        2 => 'Approved',
-        3 => 'Rejected',
+        'new' => 1,
+        'approved' => 2,
+        'rejected' => 3,
     ];
 
     const ENTITIES = [
         'place' => 'Place',
         'review' => 'Review',
     ];
-
-    public function init() {
-        parent::init();
-
-        if ($this->isNewRecord) {
-            $this->user_agent = Yii::$app->request->getUserAgent();
-            $this->status = 1;
-        }
-    }
 
     /**
      * {@inheritdoc}
@@ -50,7 +40,6 @@ class Comment extends \yii\db\ActiveRecord
     public function behaviors(): array {
         return [
             'yii\behaviors\TimestampBehavior',
-            'app\components\IpBehavior',
         ];
     }
 
@@ -61,12 +50,15 @@ class Comment extends \yii\db\ActiveRecord
         return [
             [['subject', 'subject_id', 'comment'], 'required'],
             [['subject_id', 'status'], 'integer'],
-            ['status', 'in', 'range' => array_keys(self::STATUSES)],
+            ['status', 'in', 'range' => array_values(self::STATUSES)],
+            [['status'], 'default', 'value' => self::STATUSES['new']],
             [['comment'], 'string'],
             [['created_at', 'updated_at'], 'safe'],
             [['subject'], 'string', 'max' => 30],
             [['username', 'user_agent'], 'string', 'max' => 255],
+            [['user_agent'], 'default', 'value' => $_SERVER['HTTP_USER_AGENT'] ?? php_sapi_name()],
             [['ip'], 'string', 'max' => 15],
+            [['ip'], 'default', 'value' => $_SERVER['HTTP_CLIENT_IP'] ?? ($_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'] ?? gethostbyname(gethostname()))],
         ];
     }
 

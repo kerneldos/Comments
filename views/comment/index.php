@@ -48,9 +48,9 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
             [
                 'attribute' => 'status',
-                'filter' => $searchModel::STATUSES,
+                'filter' => array_flip(Comment::STATUSES),
                 'value' => function (Comment $model) {
-                    return $model->status ? Comment::STATUSES[$model->status] : null;
+                    return $model->status ? array_flip(Comment::STATUSES)[$model->status] : null;
                 }
             ],
             ['class' => 'yii\grid\ActionColumn', 'template' => '{view} {update}'],
